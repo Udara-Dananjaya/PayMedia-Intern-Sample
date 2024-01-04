@@ -23,8 +23,7 @@ class UserController extends Controller
     {
         try {
             $request->validate([
-                'f_name' => 'required|string|max:255',
-                'l_name' => 'required|string|max:255',
+                'name' => 'required|string|max:255',
                 'email' => 'required|email|unique:users',
                 'password' => 'required|string|min:8|max:12|regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[!$#%]).*$/',
                 'img' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -32,8 +31,7 @@ class UserController extends Controller
             $user = new User(); // Create a new User instance
 
             // Set user attributes
-            $user->f_name = Str::ucfirst($request->input('f_name'));
-            $user->l_name = Str::ucfirst($request->input('l_name'));
+            $user->name = Str::ucfirst($request->input('name'));
             $user->email = $request->input('email');
 
             // Hash the password
@@ -63,8 +61,7 @@ class UserController extends Controller
 
         try {
             $request->validate([
-                'f_name' => 'string|max:255',
-                'l_name' => 'string|max:255',
+                'name' => 'string|max:255',
                 'email' => 'email|unique:users,email,' . $id,
                 'password' => 'nullable|string|min:8|max:12|regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[!$#%]).*$/',
                 'img' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -73,8 +70,7 @@ class UserController extends Controller
             $user = User::findOrFail($id);// Find the user by ID
 
             // Update user attributes
-            $user->f_name = $request->filled('f_name') ? Str::ucfirst($request->input('f_name')) : $user->f_name;
-            $user->l_name = $request->filled('l_name') ? Str::ucfirst($request->input('l_name')) : $user->l_name;
+            $user->name = $request->filled('name') ? Str::ucfirst($request->input('name')) : $user->name;
             $user->email = $request->filled('email') ? $request->input('email') : $user->email;
 
             if ($request->has('password')) {
