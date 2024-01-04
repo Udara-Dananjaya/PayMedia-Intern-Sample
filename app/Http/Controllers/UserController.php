@@ -62,7 +62,7 @@ class UserController extends Controller
         try {
             $request->validate([
                 'name' => 'string|max:255',
-                'email' => 'email|unique:users,email,' . $id,
+                'email' => 'email|unique:users',
                 'password' => 'nullable|string|min:8|max:12|regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[!$#%]).*$/',
                 'img' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
             ]);
@@ -101,7 +101,7 @@ class UserController extends Controller
     public function show($id)
     {
         try {
-            return response()->json(User::find($id), 500);
+            return response()->json(User::find($id), 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
@@ -112,7 +112,7 @@ class UserController extends Controller
         try {
             $user = User::findOrFail($id);
             $user->delete();
-            return 204;
+            return response()->json(['status' => true], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
