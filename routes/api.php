@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AuthController;
-//use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,4 +28,12 @@ Route::group([],function (){
 Route::middleware(['auth:api'])->group(function () {
     Route::post('checkToken', [AuthController::class, 'checkToken']);
     Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('list', [UserController::class, 'index']);
+
+    Route::post('create', [UserController::class, 'create']);
+    Route::post('update/{id}', [UserController::class, 'update']);
+
+    Route::post('list/{id}', [UserController::class, 'show']);
+    Route::post('delete/{id}', [UserController::class, 'delete']);
+
 });
