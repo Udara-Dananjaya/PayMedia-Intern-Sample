@@ -23,8 +23,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::group([],function (){
     Route::post('login',[AuthController::class, 'login']);
-    Route::post('checkToken',[AuthController::class, 'checkToken']);
-    Route::post('logout',[AuthController::class, 'checklogoutToken']);
-   //  Route::post('admin',[AdminController::class, 'index']);
- 
  });
+
+Route::middleware(['auth:api'])->group(function () {
+    Route::post('checkToken', [AuthController::class, 'checkToken']);
+    Route::post('logout', [AuthController::class, 'logout']);
+});
