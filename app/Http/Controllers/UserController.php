@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -28,20 +29,15 @@ class UserController extends Controller
                 'password' => 'required|string|min:8|max:12|regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[!$#%]).*$/',
                 'img' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
             ]);
-
-
-            // Create a new User instance
-            $user = new User();
+            $user = new User(); // Create a new User instance
 
             // Set user attributes
-
             $user->f_name = Str::ucfirst($request->input('f_name'));
             $user->l_name = Str::ucfirst($request->input('l_name'));
-
             $user->email = $request->input('email');
 
             // Hash the password
-            $user->password = sha1(env('APP_SECRET') . $request->input('password'));
+            $user->password =  Hash::make($request->input('password'));
 
             if ($request->hasFile('img')) {
                 $image = $request->file('img');
@@ -74,8 +70,7 @@ class UserController extends Controller
                 'img' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
             ]);
 
-            // Find the user by ID
-            $user = User::findOrFail($id);
+            $user = User::findOrFail($id);// Find the user by ID
 
             // Update user attributes
             $user->f_name = $request->filled('f_name') ? Str::ucfirst($request->input('f_name')) : $user->f_name;
@@ -84,7 +79,7 @@ class UserController extends Controller
 
             if ($request->has('password')) {
                 // Update the password only if provided
-                $user->password = sha1(env('APP_SECRET') . $request->input('password'));
+                $user->password =  Hash::make($request->input('password'));
             }
 
             // Update the image if provided
@@ -95,9 +90,7 @@ class UserController extends Controller
                 $user->img = 'images/' . $imageName;
             }
 
-
-            // Save the user
-            $user->save();
+            $user->save();// Save the user
 
             return response()->json($user, 200);
         } catch (ValidationException $e) {
