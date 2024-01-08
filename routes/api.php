@@ -25,10 +25,23 @@ Route::group([],function (){
     Route::post('login',[AuthController::class, 'login']);
  });
 
-Route::middleware(['auth:api'])->group(function () {
+// Route::middleware(['auth:api'])->group(function () {
+//     Route::post('checkToken', [AuthController::class, 'checkToken']);
+//     Route::post('logout', [AuthController::class, 'logout']);
+//     Route::post('list', [UserController::class, 'index']);
+
+//     Route::post('create', [UserController::class, 'create']);
+//     Route::post('update/{id}', [UserController::class, 'update']);
+
+//     Route::post('list/{id}', [UserController::class, 'show']);
+//     Route::post('delete/{id}', [UserController::class, 'delete']);
+
+// });
+
+Route::group([],function () {
     Route::post('checkToken', [AuthController::class, 'checkToken']);
     Route::post('logout', [AuthController::class, 'logout']);
-    Route::post('list', [UserController::class, 'index']);
+    Route::get('list', [UserController::class, 'index']);
 
     Route::post('create', [UserController::class, 'create']);
     Route::post('update/{id}', [UserController::class, 'update']);

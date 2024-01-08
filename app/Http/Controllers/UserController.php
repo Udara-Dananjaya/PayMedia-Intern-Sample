@@ -13,7 +13,7 @@ class UserController extends Controller
     public function index()
     {
         try {
-            return response()->json(User::all(), 500);
+            return response()->json(User::all(), 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
