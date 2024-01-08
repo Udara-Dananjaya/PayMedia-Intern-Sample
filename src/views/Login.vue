@@ -37,7 +37,7 @@ export default {
 
         if (response.data.status) {
           this.$store.dispatch('setAuthToken', response.data.token);
-          this.$router.push('/');
+          this.$router.push('/home');
         } else {
           this.$swal('Error', response.data.error || 'Invalid credentials. Please try again.', 'error');
         }

@@ -1,5 +1,6 @@
 // store/auth.js
 import axios from 'axios';
+import router from '../router'; // Import your router instance
 
 const state = {
   authToken: null
@@ -14,11 +15,12 @@ const mutations = {
 const actions = {
   setAuthToken({ commit }, token) {
     commit('SET_AUTH_TOKEN', token);
+    console.log(token);
   },
   async checkAuthStatus() {
     try {
       // Example: Assume you have a server-side endpoint to check the authentication status
-      const response = await axios.get('http://127.0.0.1:8000/api/check-auth');
+      const response = await axios.post('http://127.0.0.1:8000/api/checkToken');
 
       if (response.data.status) {
         return Promise.resolve(); // Authentication successful
@@ -26,7 +28,7 @@ const actions = {
         // Check for "Unauthenticated" message
         if (response.data.message === 'Unauthenticated.') {
           // Redirect to login
-          this.$router.push('/login'); // Make sure to configure your routes
+          router.push('/login');
         }
         return Promise.reject(); // Authentication failed for reasons other than "Unauthenticated" message
       }
