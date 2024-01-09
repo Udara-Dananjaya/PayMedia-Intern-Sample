@@ -15,11 +15,15 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/',
+    component: Home,
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/login',
     name: 'Login',
     component: Login
   },
-  // Add other routes here
 ];
 
 const router = new VueRouter({
@@ -29,23 +33,24 @@ const router = new VueRouter({
 router.beforeEach(async (to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
 
+  // Skip authentication check for the login route
+  if (to.name === 'Login') {
+    next();
+    return;
+  }
+
   try {
-    console.log('Checking auth status...'); // Add this line for debugging
     await store.dispatch('auth/checkAuthStatus');
 
     if (requiresAuth && !store.getters['auth/authToken']) {
-      console.log('Redirecting to login due to missing authToken...'); // Add this line for debugging
       next('/login');
     } else {
-      console.log('Authentication status is valid. Proceeding with the navigation.'); // Add this line for debugging
       next();
     }
   } catch (error) {
     console.error('Error checking auth status:', error);
-    console.log('Redirecting to login due to an error...'); // Add this line for debugging
     next('/login');
   }
 });
-
 
 export default router;
