@@ -26,25 +26,26 @@ const router = new VueRouter({
   routes
 });
 
-// Navigation guard to check authentication status before each navigation
 router.beforeEach(async (to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
 
   try {
-    // Check authentication status using the Vuex store
+    console.log('Checking auth status...'); // Add this line for debugging
     await store.dispatch('auth/checkAuthStatus');
 
     if (requiresAuth && !store.getters['auth/authToken']) {
-      // If the route requires authentication and the user is not authenticated, redirect to login
+      console.log('Redirecting to login due to missing authToken...'); // Add this line for debugging
       next('/login');
     } else {
-      // Otherwise, proceed with the navigation
+      console.log('Authentication status is valid. Proceeding with the navigation.'); // Add this line for debugging
       next();
     }
   } catch (error) {
     console.error('Error checking auth status:', error);
-    next('/login'); // Redirect to login in case of an error
+    console.log('Redirecting to login due to an error...'); // Add this line for debugging
+    next('/login');
   }
 });
+
 
 export default router;
