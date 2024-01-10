@@ -1,5 +1,4 @@
 <!-- eslint-disable vue/multi-word-component-names -->
-
 <template>
   <div class="login-form">
     <h2>Login</h2>
@@ -14,11 +13,14 @@
     </form>
   </div>
 </template>
+<!-- eslint-disable -->
 
 <script>
+
 import axios from 'axios';
 
 export default {
+  name: 'login',
   data() {
     return {
       loginData: {
@@ -30,18 +32,19 @@ export default {
   methods: {
     async loginUser() {
       try {
-        const response = await axios.post('http://127.0.0.1:8000/api/login', {
+        const response = await axios.post( 'http://127.0.0.1:8000/api/login', {
           email: this.loginData.email,
           password: this.loginData.password
         });
 
         if (response.data.status) {
-          this.$store.dispatch('setAuthToken', response.data.token);
+          this.$store.dispatch('auth/setAuthToken', response.data.token);
           this.$router.push('/home');
         } else {
           this.$swal('Error', response.data.error || 'Invalid credentials. Please try again.', 'error');
         }
 
+        // Use Vue.set or spread syntax (...) for reactivity
         this.loginData = {
           email: '',
           password: ''

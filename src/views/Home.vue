@@ -50,10 +50,10 @@
       <h2>Edit User</h2>
       <form @submit.prevent="updateUser">
         <label for="editName">Name:</label>
-        <input type="text" id="editName" v-model="editedUser.name" required>
+        <input type="text" id="editName" v-model="editedUser.name">
 
         <label for="editEmail">Email:</label>
-        <input type="email" id="editEmail" v-model="editedUser.email" required>
+        <input type="email" id="editEmail" v-model="editedUser.email">
 
         <label for="editImage">Image:</label>
         <input type="file" id="editImage" @change="handleFileChange">
@@ -95,7 +95,7 @@ export default {
   methods: {
     async fetchUserData() {
       try {
-        const response = await axios.post('http://127.0.0.1:8000/api/list/');
+        const response = await axios.post('http://127.0.0.1:8000/api/list/', {}, {headers: {Authorization: `Bearer ${localStorage.getItem('authToken')}`,'Content-Type': 'application/json'}});
         this.users = response.data;
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -113,7 +113,9 @@ export default {
     });
 
     if (result.isConfirmed) {
-      await axios.post(`http://127.0.0.1:8000/api/delete/${userId}`);
+      // eslint-disable-next-line 
+      const response = await axios.post(`http://127.0.0.1:8000/api/delete/${userId}`, {}, {headers: {Authorization: `Bearer ${localStorage.getItem('authToken')}`,'Content-Type': 'application/json'}});
+
       this.users = this.users.filter(user => user.id !== userId);
 
       await this.$swal('Deleted!', 'The user has been deleted.', 'success');
@@ -151,11 +153,7 @@ export default {
         formData.append('email', this.editedUser.email);
         formData.append('img', this.editedUser.img);
 
-        await axios.post(`http://127.0.0.1:8000/api/update/${this.editedUser.id}`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
+       await axios.post(`http://127.0.0.1:8000/api/update/${this.editedUser.id}`, formData, {headers: {Authorization: `Bearer ${localStorage.getItem('authToken')}`,'Content-Type': 'multipart/form-data'}});
 
         this.showEditForm = false;
         this.fetchUserData();
@@ -187,11 +185,7 @@ export default {
         formData.append('password', this.newUser.pass);
         formData.append('img', this.newUser.img);
 
-        await axios.post('http://127.0.0.1:8000/api/create/', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
+        await axios.post(`http://127.0.0.1:8000/api/create`, formData, { headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}`, 'Content-Type': 'multipart/form-data' } });
 
         this.showAddForm = false;
         this.fetchUserData();
