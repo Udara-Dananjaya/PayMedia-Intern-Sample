@@ -66,7 +66,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import NetworkManager from '@/network';
 
 export default {
   name: 'UserTable',
@@ -84,7 +84,7 @@ export default {
       newUser: {
         name: '',
         email: '',
-        pass:'',
+        pass: '',
         img: null
       }
     };
@@ -95,39 +95,39 @@ export default {
   methods: {
     async fetchUserData() {
       try {
-        const response = await axios.post('http://127.0.0.1:8000/api/list/', {}, {headers: {Authorization: `Bearer ${localStorage.getItem('authToken')}`,'Content-Type': 'application/json'}});
-        this.users = response.data;
+        const response = await NetworkManager.apiRequest('list', {}, true, 'application/json');
+        this.users = response.data.users;
       } catch (error) {
         console.error('Error fetching user data:', error);
       }
+
     },
     async deleteUser(userId) {
-  try {
-    const result = await this.$swal({
-      title: 'Are you sure?',
-      text: 'Once deleted, you will not be able to recover this user!',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, delete it!',
-      cancelButtonText: 'No, cancel'
-    });
+      try {
+        const result = await this.$swal({
+          title: 'Are you sure?',
+          text: 'Once deleted, you will not be able to recover this user!',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, delete it!',
+          cancelButtonText: 'No, cancel'
+        });
 
-    if (result.isConfirmed) {
-      // eslint-disable-next-line 
-      const response = await axios.post(`http://127.0.0.1:8000/api/delete/${userId}`, {}, {headers: {Authorization: `Bearer ${localStorage.getItem('authToken')}`,'Content-Type': 'application/json'}});
+        if (result.isConfirmed) {
+          // eslint-disable-next-line 
+          const response = await NetworkManager.apiRequest(`delete/${userId}`, {}, true, 'application/json');
+          this.users = this.users.filter(user => user.id !== userId);
 
-      this.users = this.users.filter(user => user.id !== userId);
-
-      await this.$swal('Deleted!', 'The user has been deleted.', 'success');
-    } else {
-      await this.$swal('Cancelled', 'Your user is safe!', 'info');
+          await this.$swal('Deleted!', 'The user has been deleted.', 'success');
+        } else {
+          await this.$swal('Cancelled', 'Your user is safe!', 'info');
+        }
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        await this.$swal('Error', 'An error occurred while deleting the user.', 'error');
+      }
     }
-  } catch (error) {
-    console.error('Error deleting user:', error);
-    await this.$swal('Error', 'An error occurred while deleting the user.', 'error');
-  }
-}
-,
+    ,
     editUser(user) {
       this.showEditForm = true;
       this.editedUser = { ...user, img: null };
@@ -151,9 +151,13 @@ export default {
         formData.append('id', this.editedUser.id);
         formData.append('name', this.editedUser.name);
         formData.append('email', this.editedUser.email);
+        if (this.editedUser.img) {
         formData.append('img', this.editedUser.img);
+      }
 
-       await axios.post(`http://127.0.0.1:8000/api/update/${this.editedUser.id}`, formData, {headers: {Authorization: `Bearer ${localStorage.getItem('authToken')}`,'Content-Type': 'multipart/form-data'}});
+
+        await NetworkManager.apiRequest(`update/${this.editedUser.id}`, formData, true, 'multipart/form-data');
+
 
         this.showEditForm = false;
         this.fetchUserData();
@@ -163,8 +167,8 @@ export default {
     },
 
     toggleAddForm() {
-    this.showAddForm = true;
-  },
+      this.showAddForm = true;
+    },
     cancelAdd() {
       this.showAddForm = false;
       this.newUser = {
@@ -183,9 +187,10 @@ export default {
         formData.append('name', this.newUser.name);
         formData.append('email', this.newUser.email);
         formData.append('password', this.newUser.pass);
-        formData.append('img', this.newUser.img);
-
-        await axios.post(`http://127.0.0.1:8000/api/create`, formData, { headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}`, 'Content-Type': 'multipart/form-data' } });
+        if (this.editedUser.img) {
+        formData.append('img', this.editedUser.img);
+      }
+        await NetworkManager.apiRequest(`create`, formData, true, 'multipart/form-data');
 
         this.showAddForm = false;
         this.fetchUserData();
@@ -204,7 +209,8 @@ table {
   margin-top: 20px;
 }
 
-th, td {
+th,
+td {
   border: 1px solid #ddd;
   padding: 8px;
   text-align: left;
@@ -231,6 +237,7 @@ label {
   display: block;
   margin-bottom: 5px;
 }
+
 .modal {
   display: flex;
   flex-direction: column;

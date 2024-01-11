@@ -2,63 +2,58 @@ import axios from "axios";
 import { appSettings } from "@/appSettings.js";
 
 class NetworkResponse {
- statusCode;
- data;
-
- constructor(statusCode = 0, data = null) {
+  constructor(statusCode = 0, data = null) {
     this.statusCode = statusCode;
     this.data = data;
- }
+  }
 }
 
 class NetworkManager {
- static async apiRequest(endpoint, data, withToken = true, contentType = "application/json") {
-    const URL = appSettings.$api_url + "/" + endpoint;
+  static async apiRequest(url, data, withToken = true, contentType = "application/json") {
+    // Construct the full URL
+    const URL = `${appSettings.$api_url}/${url}`;
 
+    // Set default headers and timeout
     let config = {
-      headers: {},
+      headers: {
+        Accept: "*/*",
+      },
       timeout: appSettings.timeoutDuration,
     };
 
+    // Include Authorization header if withToken is true
     if (withToken) {
-      let authHeader = "";
-
-      
-        authHeader = `Bearer ${localStorage.getItem('authToken')}`;
-      
-
-      config.headers = {
-        Authorization: authHeader,
-      };
+      const authToken = localStorage.getItem('authToken');
+      if (authToken) {
+        config.headers.Authorization = `Bearer ${authToken}`;
+      }
     }
 
+    // Set Content-Type header
     config.headers["Content-Type"] = contentType;
 
-    if (contentType === "multipart/form-data") {
-      config.headers["onUploadProgress"] = progressEvent => console.log(progressEvent.loaded);
-    }
-
     try {
+      // Make the API request using axios
       const response = await axios.post(URL, data, config);
       return response.data;
     } catch (error) {
+      // Handle errors and create a NetworkResponse object
+      console.error("API Request Error:", error);
       let resp = new NetworkResponse();
 
       if (error.response) {
         resp.statusCode = error.response.status;
 
         if (error.response.data) {
-          resp = error.response.data;
+          resp.data = error.response.data;
         }
-
-        
       } else {
         resp.statusCode = 502;
       }
 
       throw resp;
     }
- }
+  }
 }
 
 export default NetworkManager;
