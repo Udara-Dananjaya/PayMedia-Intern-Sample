@@ -122,31 +122,31 @@ export default {
       const file = event.target.files[0];
       this.editedUser.img = file;
     },
-    async updateUser(updatedUserData) {
-  try {
+    async updateUser(submitedFormData) {
+      try {
+        console.log('Adding user with data:', submitedFormData);
 
-    const formData = new FormData();
-    formData.append("id", updatedUserData.id);
-    formData.append("name", updatedUserData.name);
-    formData.append("email", updatedUserData.email);
-    if (updatedUserData.img) {
-      formData.append("img", updatedUserData.img);
-    }
-    console.log('Updating user with data:', formData);
-    await NetworkManager.apiRequest(
-      `update/` + updatedUserData.id,
-      formData,
-      true,
-      "multipart/form-data"
-    );
+        const formData = submitedFormData;
+        formData.append("id", this.editedUser.id);
+        formData.append("name", this.editedUser.name);
+        formData.append("email", this.editedUser.email);
+        if (this.editedUser.img) {
+          formData.append("img", this.editedUser.img);
+        }
 
-    this.showEditForm = false;
-    this.fetchUserData();
-  } catch (error) {
-    console.error("Error updating user:", error);
-  }
-}
-,
+        await NetworkManager.apiRequest(
+          `update/${this.editedUser.id}`,
+          formData,
+          true,
+          "multipart/form-data"
+        );
+
+        this.showEditForm = false;
+        this.fetchUserData();
+      } catch (error) {
+        console.error("Error updating user:", error);
+      }
+    },
 
     toggleAddForm() {
       this.showAddForm = true;
@@ -165,23 +165,15 @@ export default {
     },
     async addUser(submitedFormData) {
       try {
-        console.log("This is form data");
-        
+        console.log('Adding user with data:', submitedFormData);
 
-        submitedFormData.forEach((value, key) => {console.log(`${key}: ${value}`);});
-
-        const formData = new FormData();
-        formData.append("name", this.submitedFormData.name);
-        formData.append("email", this.submitedFormData.email);
-        formData.append("password", this.submitedFormData.pass);
-        if (this.submitedFormData.img) {
-          formData.append("img", this.submitedFormData.img);
+        const formData = submitedFormData;
+        formData.append("name", this.newUser.name);
+        formData.append("email", this.newUser.email);
+        formData.append("password", this.newUser.pass);
+        if (this.newUser.img) {
+          formData.append("img", this.newUser.img);
         }
-        
-        console.log("This is form data");
-        formData.forEach((value, key) => {console.log(`${key}: ${value}`);});
-
-
         await NetworkManager.apiRequest(`create`, formData, true, "multipart/form-data");
 
         this.showAddForm = false;
@@ -190,23 +182,16 @@ export default {
         console.error("Error adding user:", error);
       }
     }, handleFormSubmitted({ action, data }) {
-      console.log(action);
-
-      if (action == 'add') {
-        //data.forEach((value, key) => {console.log(`${key}: ${value}`);});
-
+      console.log("data Get" + data + " AC " +(action === 'update'));
+      if (action === 'add') {
         // Handle data for add action
         this.addUser(data);
-
-      } else if (action == 'update') {
+        console.log(data);
+        
+      } else if (action === 'update') {
         // Handle data for update action
         this.updateUser(data);
       }
-    },
-    cancelForm() {
-    this.showEditForm = false;
-      this.showAddForm = false;
-
     },
   },
 };
