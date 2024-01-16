@@ -26,8 +26,11 @@ const routes = [
   },
 ];
 
+
 const router = new VueRouter({
-  routes
+  mode: 'history', // This is where you specify history mode
+  base: process.env.BASE_URL,
+  routes,
 });
 
 router.beforeEach(async (to, from, next) => {
