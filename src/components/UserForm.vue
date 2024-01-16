@@ -2,7 +2,7 @@
 <template>
   <div class="modal">
     <h2>{{ isEditing ? 'Edit User' : 'Add New User' }}</h2>
-    <form @submit.prevent="isEditing ? updateUser() : addUser">
+    <form @submit.prevent="isEditing ? updateUser() : addUser()">
       <label for="name">{{ isEditing ? 'Edit' : 'Add' }} Name:</label>
       <input type="text" id="name" v-model="localUserData.name" required>
 
@@ -13,10 +13,17 @@
       <input type="password" id="pass" v-model="localUserData.pass" v-if="!isEditing" required>
 
       <label for="image">Image:</label>
-      <input type="file" id="image" @change="handleFileChange">
+      <input type="file" accept="image/*" @change="handleFileChange" class="form-control-file" id="image">
+
+
+      <div class="border p-2 mt-3">
+        <p>Preview Here:</p>
+          <img :src="imgurl" class="img-fluid" width="100px" />
+      </div>
 
       <button type="submit">{{ isEditing ? 'Update User' : 'Add User' }}</button>
       <button type="button" @click="cancelForm">Cancel</button>
+
     </form>
   </div>
 </template>
@@ -29,7 +36,10 @@ export default {
   },
   data() {
     return {
-      localUserData: { ...this.userData },
+      localUserData: { ...this.userData, img: null },
+
+      imgurl: null, // Add imgurl to data
+
     };
   },
   methods: {
@@ -43,7 +53,9 @@ export default {
           formData.append("img", this.localUserData.img);
         }
         console.log('User added successfully');
-        this.$emit('submit', { ...this.formData });
+        //this.$emit('submit', { ...this.formData });
+        this.$emit('form-submitted', { action: 'add', data: formData });
+
 
       } catch (error) {
         console.error('Error adding user:', error);
@@ -60,21 +72,23 @@ export default {
           formData.append("img", this.localUserData.img);
         }
         console.log('User updated successfully');
-        this.$emit('submit', { ...this.formData });
+        this.$emit('form-submitted', { action: 'update', data: formData });
+
       } catch (error) {
         console.error('Error updating user:', error);
       }
     },
-
     cancelForm() {
       console.log('Form canceled');
-      this.$emit('cancel');
+      this.$emit('form-canceled');
     },
 
     handleFileChange(event) {
       const file = event.target.files[0];
       console.log('File changed:', file);
       this.localUserData.img = file;
+      this.imgurl = URL.createObjectURL(file);
+
     },
   },
   watch: {

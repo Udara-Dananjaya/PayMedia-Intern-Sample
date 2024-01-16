@@ -24,8 +24,15 @@
       </tbody>
     </table>
     <button @click="toggleAddForm">Add New User</button>
-    <UserForm v-if="showAddForm || showEditForm" :is-editing="showEditForm"
-      :user-data="showEditForm ? editedUser : newUser" @cancel="cancelForm" @submit="submitForm" />
+
+      <UserForm
+      v-if="showAddForm || showEditForm"
+      :is-editing="showEditForm"
+      :user-data="showEditForm ? editedUser : newUser"
+      @form-submitted="handleFormSubmitted"
+      @form-canceled="cancelForm"
+    />
+
   </div>
 </template>
   
@@ -115,29 +122,31 @@ export default {
       const file = event.target.files[0];
       this.editedUser.img = file;
     },
-    async updateUser() {
-      try {
-        const formData = new FormData();
-        formData.append("id", this.editedUser.id);
-        formData.append("name", this.editedUser.name);
-        formData.append("email", this.editedUser.email);
-        if (this.editedUser.img) {
-          formData.append("img", this.editedUser.img);
-        }
+    async updateUser(updatedUserData) {
+  try {
 
-        await NetworkManager.apiRequest(
-          `update/${this.editedUser.id}`,
-          formData,
-          true,
-          "multipart/form-data"
-        );
+    const formData = new FormData();
+    formData.append("id", updatedUserData.id);
+    formData.append("name", updatedUserData.name);
+    formData.append("email", updatedUserData.email);
+    if (updatedUserData.img) {
+      formData.append("img", updatedUserData.img);
+    }
+    console.log('Updating user with data:', formData);
+    await NetworkManager.apiRequest(
+      `update/` + updatedUserData.id,
+      formData,
+      true,
+      "multipart/form-data"
+    );
 
-        this.showEditForm = false;
-        this.fetchUserData();
-      } catch (error) {
-        console.error("Error updating user:", error);
-      }
-    },
+    this.showEditForm = false;
+    this.fetchUserData();
+  } catch (error) {
+    console.error("Error updating user:", error);
+  }
+}
+,
 
     toggleAddForm() {
       this.showAddForm = true;
@@ -154,15 +163,25 @@ export default {
       const file = event.target.files[0];
       this.newUser.img = file;
     },
-    async addUser() {
+    async addUser(submitedFormData) {
       try {
+        console.log("This is form data");
+        
+
+        submitedFormData.forEach((value, key) => {console.log(`${key}: ${value}`);});
+
         const formData = new FormData();
-        formData.append("name", this.newUser.name);
-        formData.append("email", this.newUser.email);
-        formData.append("password", this.newUser.pass);
-        if (this.newUser.img) {
-          formData.append("img", this.newUser.img);
+        formData.append("name", this.submitedFormData.name);
+        formData.append("email", this.submitedFormData.email);
+        formData.append("password", this.submitedFormData.pass);
+        if (this.submitedFormData.img) {
+          formData.append("img", this.submitedFormData.img);
         }
+        
+        console.log("This is form data");
+        formData.forEach((value, key) => {console.log(`${key}: ${value}`);});
+
+
         await NetworkManager.apiRequest(`create`, formData, true, "multipart/form-data");
 
         this.showAddForm = false;
@@ -170,6 +189,24 @@ export default {
       } catch (error) {
         console.error("Error adding user:", error);
       }
+    }, handleFormSubmitted({ action, data }) {
+      console.log(action);
+
+      if (action == 'add') {
+        //data.forEach((value, key) => {console.log(`${key}: ${value}`);});
+
+        // Handle data for add action
+        this.addUser(data);
+
+      } else if (action == 'update') {
+        // Handle data for update action
+        this.updateUser(data);
+      }
+    },
+    cancelForm() {
+    this.showEditForm = false;
+      this.showAddForm = false;
+
     },
   },
 };
