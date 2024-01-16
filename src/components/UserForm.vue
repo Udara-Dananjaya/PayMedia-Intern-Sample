@@ -18,7 +18,7 @@
 
       <div class="border p-2 mt-3">
         <p>Preview Here:</p>
-          <img :src="imgurl" class="img-fluid" width="100px" />
+        <img :src="isEditingImg ? localUserData.img : imgurl" class="img-fluid" width="100px" />
       </div>
 
       <button type="submit">{{ isEditing ? 'Update User' : 'Add User' }}</button>
@@ -36,8 +36,8 @@ export default {
   },
   data() {
     return {
-      localUserData: { ...this.userData, img: null },
-
+      localUserData: { ...this.userData},
+      isEditingImg:{...this.userData.img},
       imgurl: null, // Add imgurl to data
 
     };
@@ -88,7 +88,7 @@ export default {
       console.log('File changed:', file);
       this.localUserData.img = file;
       this.imgurl = URL.createObjectURL(file);
-
+      this.isEditingImg=false;
     },
   },
   watch: {

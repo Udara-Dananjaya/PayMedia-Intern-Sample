@@ -15,7 +15,10 @@
         <tr v-for="user in users" :key="user.id">
           <td>{{ user.name }}</td>
           <td>{{ user.email }}</td>
-          <td><img :src="'http://127.0.0.1:8000/' + user.img" alt="User Image"></td>
+          <td>
+            <img v-if="user.img" :src="user.img" alt="User Image">
+            <span v-else>-</span>
+          </td>
           <td>
             <button @click="editUser(user)">Edit</button>
             <button @click="deleteUser(user.id)">Delete</button>
@@ -25,13 +28,9 @@
     </table>
     <button @click="toggleAddForm">Add New User</button>
 
-      <UserForm
-      v-if="showAddForm || showEditForm"
-      :is-editing="showEditForm"
-      :user-data="showEditForm ? editedUser : newUser"
-      @form-submitted="handleFormSubmitted"
-      @form-canceled="cancelForm"
-    />
+    <UserForm v-if="showAddForm || showEditForm" :is-editing="showEditForm"
+      :user-data="showEditForm ? editedUser : newUser" @form-submitted="handleFormSubmitted"
+      @form-canceled="cancelForm" />
 
   </div>
 </template>
@@ -72,6 +71,10 @@ export default {
       try {
         const response = await NetworkManager.apiRequest("list", {}, true, "application/json");
         this.users = response.data.users;
+        this.users = response.data.users.map(user => ({
+          ...user,
+          img: user.img ? `${process.env.VUE_APP_BASE_URL}${user.img}` : null,
+        }));
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
@@ -107,7 +110,7 @@ export default {
     },
     editUser(user) {
       this.showEditForm = true;
-      this.editedUser = { ...user, img: null };
+      this.editedUser = { ...user };
     },
     cancelEdit() {
       this.showEditForm = false;
@@ -124,19 +127,11 @@ export default {
     },
     async updateUser(submitedFormData) {
       try {
-        console.log('Adding user with data:', submitedFormData);
-
-        const formData = submitedFormData;
-        formData.append("id", this.editedUser.id);
-        formData.append("name", this.editedUser.name);
-        formData.append("email", this.editedUser.email);
-        if (this.editedUser.img) {
-          formData.append("img", this.editedUser.img);
-        }
+        
 
         await NetworkManager.apiRequest(
           `update/${this.editedUser.id}`,
-          formData,
+          submitedFormData,
           true,
           "multipart/form-data"
         );
@@ -165,16 +160,8 @@ export default {
     },
     async addUser(submitedFormData) {
       try {
-        console.log('Adding user with data:', submitedFormData);
-
-        const formData = submitedFormData;
-        formData.append("name", this.newUser.name);
-        formData.append("email", this.newUser.email);
-        formData.append("password", this.newUser.pass);
-        if (this.newUser.img) {
-          formData.append("img", this.newUser.img);
-        }
-        await NetworkManager.apiRequest(`create`, formData, true, "multipart/form-data");
+     
+        await NetworkManager.apiRequest(`create`, submitedFormData, true, "multipart/form-data");
 
         this.showAddForm = false;
         this.fetchUserData();
@@ -182,16 +169,19 @@ export default {
         console.error("Error adding user:", error);
       }
     }, handleFormSubmitted({ action, data }) {
-      console.log("data Get" + data + " AC " +(action === 'update'));
+      console.log("data Get" + data + " AC " + (action === 'update'));
       if (action === 'add') {
         // Handle data for add action
         this.addUser(data);
         console.log(data);
-        
+
       } else if (action === 'update') {
         // Handle data for update action
         this.updateUser(data);
       }
+    },cancelForm(){
+this.showAddForm =  false;
+this.showEditForm = false;
     },
   },
 };
