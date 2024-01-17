@@ -56,7 +56,6 @@ export default {
         //this.$emit('submit', { ...this.formData });
         this.$emit('form-submitted', { action: 'add', data: formData });
 
-
       } catch (error) {
         console.error('Error adding user:', error);
       }

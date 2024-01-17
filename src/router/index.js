@@ -20,6 +20,19 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/list',
+    name: 'User List',
+    component: () => import('../views/UserListView.vue'), // Corrected the import
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/edit/:id',
+    name: 'edit',
+    component: () => import('../views/UserListForm.vue'), // Corrected the import
+    props: true,
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/login',
     name: 'Login',
     component: Login
